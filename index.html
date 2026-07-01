@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KolaborAksi 066 — BNI Agen46</title>
+<title>KolaborAksi — BNI Agen46</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -484,6 +484,107 @@
     cursor:pointer;
     margin-bottom:16px;
   }
+  .status-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:600;
+    white-space:nowrap;
+  }
+  .status-badge::before{ content:''; width:6px; height:6px; border-radius:50%; }
+  .status-menunggu{ background:#F1F3F5; color:#6B7686; }
+  .status-menunggu::before{ background:#9AA5B1; }
+  .status-proses{ background:#FFF6E0; color:#A9740B; }
+  .status-proses::before{ background:#F3B217; }
+  .status-closing{ background:#E9FAF0; color:#158A44; }
+  .status-closing::before{ background:var(--green); }
+  .status-tidak{ background:#FDECEA; color:#C23327; }
+  .status-tidak::before{ background:var(--danger); }
+
+  /* ---------- PROGRESS THRESHOLD ---------- */
+  .progress-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .progress-row .p-name{
+    width:130px;
+    flex-shrink:0;
+    font-size:13px;
+    font-weight:600;
+    color:var(--navy);
+  }
+  .progress-track{
+    flex:1;
+    height:10px;
+    background:#EEF1F3;
+    border-radius:999px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    border-radius:999px;
+    background:linear-gradient(90deg,var(--orange),var(--orange-2));
+    transition:width .3s;
+  }
+  .progress-fill.met{ background:linear-gradient(90deg,var(--green),#3FD087); }
+  .progress-count{
+    width:56px;
+    flex-shrink:0;
+    text-align:right;
+    font-size:12px;
+    font-weight:700;
+    color:var(--muted);
+  }
+  .progress-count.met{ color:var(--green); }
+  .lb-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:#FAFBFC;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:9px 12px;
+  }
+  .lb-rank{
+    width:22px; height:22px;
+    border-radius:50%;
+    background:var(--navy);
+    color:#fff;
+    font-size:11px;
+    font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .lb-rank.gold{ background:#D4A017; }
+  .lb-rank.silver{ background:#9AA5B1; }
+  .lb-rank.bronze{ background:#B5651D; }
+  .lb-name{ flex:1; font-size:13px; font-weight:600; color:var(--navy); }
+  .lb-count{ font-size:12px; font-weight:700; color:var(--teal); }
+  .lb-badge{
+    font-size:10px;
+    font-weight:700;
+    padding:2px 8px;
+    border-radius:999px;
+    background:#E9FAF0;
+    color:#158A44;
+  }
+
+  /* ---------- SORTABLE TABLE HEADER ---------- */
+  th.sortable{ cursor:pointer; user-select:none; }
+  th.sortable:hover{ opacity:.85; }
+  .sort-arrow{ font-size:9px; margin-left:3px; opacity:.7; }
+
+  /* ---------- DUPLICATE WARNING ---------- */
+  .dup-flag{
+    color:var(--danger);
+    font-weight:700;
+    margin-right:4px;
+    cursor:help;
+  }
 
   @media (max-width:480px){
     h1{ font-size:32px; }
@@ -493,6 +594,27 @@
 </style>
 </head>
 <body>
+
+  <!-- ============ DETAIL MODAL ============ -->
+  <div class="modal-overlay" id="detailOverlay">
+    <div class="modal" style="max-width:400px; text-align:left; max-height:85vh; overflow-y:auto;">
+      <h3 style="margin-bottom:16px;">Detail Submission</h3>
+      <div id="detailBody" style="display:flex; flex-direction:column; gap:12px;"></div>
+      <button class="btn-cancel" id="detailClose" style="width:100%; margin-top:18px; padding:12px; border-radius:11px; font-family:'Inter',sans-serif; font-weight:600; font-size:13px; border:none; cursor:pointer;">Tutup</button>
+    </div>
+  </div>
+
+  <!-- ============ PHOTO PREVIEW MODAL ============ -->
+  <div class="modal-overlay" id="photoOverlay">
+    <div class="modal" style="max-width:420px;">
+      <h3 id="photoTitle" style="margin-bottom:14px;">Foto</h3>
+      <img id="photoImg" src="" alt="Preview" style="width:100%; border-radius:12px; border:1px solid var(--border); margin-bottom:16px; display:block;">
+      <div class="modal-actions">
+        <button class="btn-cancel" id="photoClose">Tutup</button>
+        <a class="btn-confirm" id="photoDownload" href="" download style="text-decoration:none; display:flex; align-items:center; justify-content:center;">⬇ Download</a>
+      </div>
+    </div>
+  </div>
 
   <div class="top-marquee">
     <div class="track">
@@ -518,7 +640,7 @@
     <!-- ============ FORM VIEW ============ -->
     <div id="formView">
       <div class="eyebrow">Form Pendaftaran</div>
-      <h1>KolaborAksi <span class="hl">066</span></h1>
+      <h1>KolaborAksi</h1>
       <p class="subtitle">Isi data referral calon Agen46 dengan lengkap dan benar agar dapat diproses dan dihitung dalam program apresiasi.</p>
 
       <form class="card" id="kolaborForm">
@@ -566,6 +688,11 @@
         </div>
 
         <div class="field">
+          <label>Alamat Email Wondr<span class="req">*</span></label>
+          <input type="email" id="emailWondr" placeholder="email@contoh.com" required>
+        </div>
+
+        <div class="field">
           <label>Jenis Usaha Calon Agen<span class="req">*</span></label>
           <select id="jenisUsaha" required>
             <option value="" disabled selected>— Pilih Jenis Usaha —</option>
@@ -595,6 +722,16 @@
           <small>Maks. 10MB. Format gambar (JPG/PNG).</small>
         </div>
 
+        <div class="field">
+          <label>Upload Foto KTP <span style="color:var(--muted); text-transform:none; font-weight:500;">(Opsional)</span></label>
+          <div class="file-row">
+            <label class="file-btn" for="fotoKtp">📎 Pilih File</label>
+            <span class="file-name" id="fileNameKtp">Belum ada file dipilih</span>
+          </div>
+          <input type="file" id="fotoKtp" accept="image/*" style="display:none;">
+          <small>Maks. 10MB. Format gambar (JPG/PNG).</small>
+        </div>
+
         <button type="submit" class="submit-btn" id="submitBtn">Kirim Pendaftaran</button>
       </form>
     </div>
@@ -608,23 +745,38 @@
 
       <div class="stats-grid" id="statsGrid"></div>
 
+      <div class="card" id="progressCard">
+        <div class="section-label"><div class="section-bar"></div><span>Progress Threshold Program (Bulan Ini)</span></div>
+        <p style="font-size:12px; color:var(--muted); margin:-10px 0 16px;">Target: min. 5 referral closing/cabang/bulan • min. 2 referral closing/pegawai/bulan. Dihitung dari status "Closing" pada bulan berjalan.</p>
+        <div id="cabangProgress" style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;"></div>
+        <div class="section-label" style="margin-top:4px;"><div class="section-bar"></div><span>Leaderboard Pegawai (Closing)</span></div>
+        <div id="pegawaiLeaderboard" style="display:flex; flex-direction:column; gap:8px;"></div>
+      </div>
+
       <div class="card">
-        <div class="section-label"><div class="section-bar"></div><span>Filter</span></div>
+        <div class="section-label"><div class="section-bar"></div><span>Filter & Data</span></div>
         <div class="filters">
           <select id="filterCabang"><option value="">Semua Cabang</option></select>
           <input type="text" id="filterPegawai" placeholder="Cari nama pegawai / calon agen...">
+          <button class="btn-internal" id="exportBtn" style="border-color:var(--green); color:#158A44;">⬇ Export CSV</button>
           <button class="btn-internal" id="refreshBtn" style="border-color:var(--navy-2); color:var(--navy-2);">↻ Refresh</button>
         </div>
+        <div id="duplicateWarning" style="display:none; background:#FFF6E0; border:1px solid #F3D98A; color:#8A650B; font-size:12.5px; padding:10px 14px; border-radius:10px; margin-bottom:14px;"></div>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>Waktu</th><th>NPP</th><th>Nama Pegawai</th><th>Cabang</th>
-                <th>Nama Calon Agen</th><th>No. HP</th><th>Jenis Usaha</th><th>Foto</th>
+                <th class="sortable" data-key="Timestamp">Waktu <span class="sort-arrow"></span></th>
+                <th class="sortable" data-key="Nama Pegawai">Nama Pegawai <span class="sort-arrow"></span></th>
+                <th class="sortable" data-key="Cabang">Cabang <span class="sort-arrow"></span></th>
+                <th class="sortable" data-key="Nama Calon Agen">Nama Calon Agen <span class="sort-arrow"></span></th>
+                <th class="sortable" data-key="Jenis Usaha Calon Agen">Jenis Usaha <span class="sort-arrow"></span></th>
+                <th class="sortable" data-key="Status Follow Up">Status <span class="sort-arrow"></span></th>
+                <th>Aksi</th>
               </tr>
             </thead>
             <tbody id="tableBody">
-              <tr><td colspan="8" class="empty-row">Memuat data...</td></tr>
+              <tr><td colspan="7" class="empty-row">Memuat data...</td></tr>
             </tbody>
           </table>
         </div>
@@ -650,7 +802,7 @@
 
 <script>
 /* ================== KONFIGURASI ================== */
-const API_URL   = 'https://script.google.com/macros/s/AKfycbwDowztaNfQtnS2JieCqCtuRaFkRLmvfCrRBICIvvx8dJt0IFIXXy5oA20WOv2LHNy_lA/exec'; // <- ganti sesuai SETUP_GUIDE.md
+const API_URL   = 'https://script.google.com/macros/s/AKfycbwDcAPR_ZiM5hqqZYqrhDmFEdAoELwaQEwvcYCbfTc2Ewug1dmqDYvfRS0lFyM-iy4t1A/exec'; // <- ganti sesuai SETUP_GUIDE.md
 const ADMIN_PIN  = '700115'; // <- ganti PIN internal sesuai kebutuhan
 
 /* ================== HELPER ================== */
@@ -679,6 +831,11 @@ $('foto').addEventListener('change', (e)=>{
   $('fileName').textContent = f ? f.name + ' (' + (f.size/1024/1024).toFixed(2) + ' MB)' : 'Belum ada file dipilih';
 });
 
+$('fotoKtp').addEventListener('change', (e)=>{
+  const f = e.target.files[0];
+  $('fileNameKtp').textContent = f ? f.name + ' (' + (f.size/1024/1024).toFixed(2) + ' MB)' : 'Belum ada file dipilih';
+});
+
 $('kolaborForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
   const btn = $('submitBtn');
@@ -693,6 +850,7 @@ $('kolaborForm').addEventListener('submit', async (e)=>{
       noRekening: $('noRekening').value.trim(),
       namaCalonAgen: $('namaCalonAgen').value.trim(),
       noHp: $('noHp').value.trim(),
+      emailWondr: $('emailWondr').value.trim(),
       jenisUsaha: $('jenisUsaha').value,
       alamatUsaha: $('alamatUsaha').value.trim()
     };
@@ -700,10 +858,19 @@ $('kolaborForm').addEventListener('submit', async (e)=>{
     const fotoFile = $('foto').files[0];
     if (fotoFile){
       if (fotoFile.size > 10 * 1024 * 1024){
-        throw new Error('Ukuran foto melebihi 10MB.');
+        throw new Error('Ukuran foto akuisisi melebihi 10MB.');
       }
       const base64 = await fileToBase64(fotoFile);
       payload.foto = { base64, mimeType: fotoFile.type, fileName: fotoFile.name };
+    }
+
+    const fotoKtpFile = $('fotoKtp').files[0];
+    if (fotoKtpFile){
+      if (fotoKtpFile.size > 10 * 1024 * 1024){
+        throw new Error('Ukuran foto KTP melebihi 10MB.');
+      }
+      const base64Ktp = await fileToBase64(fotoKtpFile);
+      payload.fotoKtp = { base64: base64Ktp, mimeType: fotoKtpFile.type, fileName: fotoKtpFile.name };
     }
 
     if (API_URL.indexOf('PASTE_WEB_APP_URL') > -1){
@@ -721,6 +888,7 @@ $('kolaborForm').addEventListener('submit', async (e)=>{
       showToast('Pendaftaran berhasil dikirim ✓');
       $('kolaborForm').reset();
       $('fileName').textContent = 'Belum ada file dipilih';
+      $('fileNameKtp').textContent = 'Belum ada file dipilih';
     } else {
       throw new Error(result.error || 'Gagal mengirim data.');
     }
@@ -761,9 +929,95 @@ $('backLink').addEventListener('click', ()=>{
   $('formView').classList.remove('dash-hidden');
 });
 
+const CABANG_LIST = ['KC Sumbawa Besar','KCP Garuda','KCP Taliwang','KCP Maluk','KCP Townsite','KCP Plampang','KCP Lunyuk'];
+
+let duplicateIds = new Set();
+
+function computeDuplicates(data){
+  duplicateIds = new Set();
+  const byRekening = {};
+  const byNama = {};
+  data.forEach(d=>{
+    const rek = (d['No. Rekening Calon Agen']||'').toString().trim();
+    const nama = (d['Nama Calon Agen']||'').toString().trim().toLowerCase();
+    if (rek){ (byRekening[rek] = byRekening[rek]||[]).push(d); }
+    if (nama){ (byNama[nama] = byNama[nama]||[]).push(d); }
+  });
+  let groupCount = 0;
+  [byRekening, byNama].forEach(group=>{
+    Object.values(group).forEach(list=>{
+      if (list.length > 1){
+        groupCount++;
+        list.forEach(d=> duplicateIds.add(d['ID Submission']));
+      }
+    });
+  });
+  const warnEl = $('duplicateWarning');
+  if (duplicateIds.size > 0){
+    warnEl.style.display = 'block';
+    warnEl.textContent = '⚠️ Terdeteksi ' + duplicateIds.size + ' submission dengan No. Rekening atau Nama Calon Agen yang sama dengan submission lain. Ditandai dengan tanda ⚠ di tabel.';
+  } else {
+    warnEl.style.display = 'none';
+  }
+}
+
+function renderProgress(data){
+  const now = new Date();
+  const curMonth = now.getMonth();
+  const curYear = now.getFullYear();
+
+  const closingThisMonth = data.filter(d=>{
+    if (d['Status Follow Up'] !== 'Closing') return false;
+    if (!d['Timestamp']) return false;
+    const t = new Date(d['Timestamp']);
+    return t.getMonth() === curMonth && t.getFullYear() === curYear;
+  });
+
+  const perCabang = {};
+  CABANG_LIST.forEach(c=> perCabang[c] = 0);
+  closingThisMonth.forEach(d=>{
+    const c = d['Cabang'];
+    if (c) perCabang[c] = (perCabang[c]||0) + 1;
+  });
+
+  $('cabangProgress').innerHTML = CABANG_LIST.map(c=>{
+    const count = perCabang[c] || 0;
+    const target = 5;
+    const pct = Math.min((count/target)*100, 100);
+    const met = count >= target;
+    return `<div class="progress-row">
+      <div class="p-name">${c}</div>
+      <div class="progress-track"><div class="progress-fill ${met?'met':''}" style="width:${pct}%;"></div></div>
+      <div class="progress-count ${met?'met':''}">${count}/${target}</div>
+    </div>`;
+  }).join('');
+
+  const perPegawai = {};
+  closingThisMonth.forEach(d=>{
+    const n = d['Nama Pegawai'];
+    if (n) perPegawai[n] = (perPegawai[n]||0) + 1;
+  });
+  const ranked = Object.entries(perPegawai).sort((a,b)=> b[1]-a[1]).slice(0, 6);
+
+  if (ranked.length === 0){
+    $('pegawaiLeaderboard').innerHTML = '<div style="font-size:12.5px; color:var(--muted);">Belum ada referral closing bulan ini.</div>';
+  } else {
+    $('pegawaiLeaderboard').innerHTML = ranked.map(([name, count], i)=>{
+      const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+      const met = count >= 2;
+      return `<div class="lb-row">
+        <div class="lb-rank ${rankClass}">${i+1}</div>
+        <div class="lb-name">${name}</div>
+        <div class="lb-count">${count} closing</div>
+        ${met ? '<span class="lb-badge">✓ Threshold</span>' : ''}
+      </div>`;
+    }).join('');
+  }
+}
+
 /* ================== DASHBOARD ================== */
 async function loadDashboard(){
-  $('tableBody').innerHTML = '<tr><td colspan="8" class="empty-row">Memuat data...</td></tr>';
+  $('tableBody').innerHTML = '<tr><td colspan="7" class="empty-row">Memuat data...</td></tr>';
   try{
     if (API_URL.indexOf('PASTE_WEB_APP_URL') > -1){
       throw new Error('API_URL belum diisi. Lihat SETUP_GUIDE.md.');
@@ -772,11 +1026,13 @@ async function loadDashboard(){
     const result = await res.json();
     if (!result.success) throw new Error(result.error || 'Gagal memuat data.');
     dashboardData = result.data;
+    computeDuplicates(dashboardData);
     populateCabangFilter();
     renderStats(dashboardData);
+    renderProgress(dashboardData);
     renderTable(dashboardData);
   }catch(err){
-    $('tableBody').innerHTML = '<tr><td colspan="8" class="empty-row">' + err.message + '</td></tr>';
+    $('tableBody').innerHTML = '<tr><td colspan="7" class="empty-row">' + err.message + '</td></tr>';
   }
 }
 
@@ -797,6 +1053,7 @@ function renderStats(data){
   const totalSubmit = data.length;
   const totalCabang = new Set(data.map(d=>d['Cabang']).filter(Boolean)).size;
   const totalPegawai = new Set(data.map(d=>d['Nama Pegawai']).filter(Boolean)).size;
+  const totalClosing = data.filter(d=> d['Status Follow Up'] === 'Closing').length;
 
   const perPegawai = {};
   data.forEach(d=>{
@@ -808,45 +1065,212 @@ function renderStats(data){
 
   $('statsGrid').innerHTML = `
     <div class="stat-card"><div class="num">${totalSubmit}</div><div class="label">Total Submission</div></div>
+    <div class="stat-card"><div class="num" style="color:var(--green);">${totalClosing}</div><div class="label">Total Closing</div></div>
     <div class="stat-card"><div class="num">${totalCabang}</div><div class="label">Cabang Aktif</div></div>
     <div class="stat-card"><div class="num">${totalPegawai}</div><div class="label">Pegawai Berpartisipasi</div></div>
+    <div class="stat-card"><div class="num" style="color:${duplicateIds.size>0 ? 'var(--danger)':'var(--navy)'};">${duplicateIds.size}</div><div class="label">Duplikat Terdeteksi</div></div>
     <div class="stat-card"><div class="num" style="font-size:16px;">${topPegawai}</div><div class="label">Referral Terbanyak (${topCount})</div></div>
   `;
 }
+
+function statusBadgeClass(status){
+  if (status === 'Closing') return 'status-closing';
+  if (status === 'Tidak Closing') return 'status-tidak';
+  if (status === 'Proses') return 'status-proses';
+  return 'status-menunggu';
+}
+
+let filteredData = [];
+let sortKey = 'Timestamp';
+let sortDir = 'desc';
 
 function renderTable(data){
   const cabangFilter = $('filterCabang').value;
   const searchFilter = $('filterPegawai').value.trim().toLowerCase();
 
-  const filtered = data.filter(d=>{
+  filteredData = data.filter(d=>{
     if (cabangFilter && d['Cabang'] !== cabangFilter) return false;
     if (searchFilter){
       const hay = ((d['Nama Pegawai']||'') + ' ' + (d['Nama Calon Agen']||'')).toLowerCase();
       if (hay.indexOf(searchFilter) === -1) return false;
     }
     return true;
-  }).sort((a,b)=> new Date(b['Timestamp']) - new Date(a['Timestamp']));
+  }).sort((a,b)=>{
+    let va = a[sortKey], vb = b[sortKey];
+    if (sortKey === 'Timestamp'){ va = new Date(va||0); vb = new Date(vb||0); }
+    else { va = (va||'').toString().toLowerCase(); vb = (vb||'').toString().toLowerCase(); }
+    if (va < vb) return sortDir === 'asc' ? -1 : 1;
+    if (va > vb) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
 
-  if (filtered.length === 0){
-    $('tableBody').innerHTML = '<tr><td colspan="8" class="empty-row">Belum ada data yang cocok.</td></tr>';
+  document.querySelectorAll('th.sortable .sort-arrow').forEach(el=> el.textContent = '');
+  const activeTh = document.querySelector(`th.sortable[data-key="${sortKey}"] .sort-arrow`);
+  if (activeTh) activeTh.textContent = sortDir === 'asc' ? '▲' : '▼';
+
+  if (filteredData.length === 0){
+    $('tableBody').innerHTML = '<tr><td colspan="7" class="empty-row">Belum ada data yang cocok.</td></tr>';
     return;
   }
 
-  $('tableBody').innerHTML = filtered.map(d=>{
+  $('tableBody').innerHTML = filteredData.map((d, i)=>{
     const ts = d['Timestamp'] ? new Date(d['Timestamp']).toLocaleString('id-ID', { dateStyle:'short', timeStyle:'short' }) : '-';
-    const foto = d['Link Foto'] ? `<a href="${d['Link Foto']}" target="_blank">Lihat</a>` : '-';
+    const status = d['Status Follow Up'] || 'Menunggu Follow Up';
+    const isDup = duplicateIds.has(d['ID Submission']);
+    const dupFlag = isDup ? '<span class="dup-flag" title="Kemungkinan duplikat: No. Rekening atau Nama Calon Agen sama dengan submission lain">⚠</span>' : '';
     return `<tr>
       <td>${ts}</td>
-      <td>${d['NPP Lengkap']||'-'}</td>
       <td>${d['Nama Pegawai']||'-'}</td>
       <td>${d['Cabang']||'-'}</td>
-      <td>${d['Nama Calon Agen']||'-'}</td>
-      <td>${d['No. HP/WA Calon Agen']||'-'}</td>
+      <td>${dupFlag}${d['Nama Calon Agen']||'-'}</td>
       <td>${d['Jenis Usaha Calon Agen']||'-'}</td>
-      <td>${foto}</td>
+      <td><span class="status-badge ${statusBadgeClass(status)}">${status}</span></td>
+      <td><button class="btn-internal" style="padding:6px 12px; font-size:12px;" onclick="openDetail(${i})">Detail</button></td>
     </tr>`;
   }).join('');
 }
+
+document.querySelectorAll('th.sortable').forEach(th=>{
+  th.addEventListener('click', ()=>{
+    const key = th.getAttribute('data-key');
+    if (sortKey === key){
+      sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      sortKey = key;
+      sortDir = key === 'Timestamp' ? 'desc' : 'asc';
+    }
+    renderTable(dashboardData);
+  });
+});
+
+/* ================== EXPORT CSV ================== */
+function csvEscape(val){
+  const s = (val === undefined || val === null) ? '' : String(val);
+  if (s.indexOf(',') > -1 || s.indexOf('"') > -1 || s.indexOf('\n') > -1){
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
+}
+
+$('exportBtn').addEventListener('click', ()=>{
+  if (filteredData.length === 0){
+    showToast('Tidak ada data untuk diexport.', true);
+    return;
+  }
+  const cols = ['Timestamp','NPP Lengkap','Nama Pegawai','Cabang','No. Rekening Calon Agen','Nama Calon Agen',
+    'No. HP/WA Calon Agen','Alamat Email Wondr','Jenis Usaha Calon Agen','Alamat Usaha Calon Agen',
+    'Status Follow Up','Catatan Follow Up','Link Foto','Link Foto KTP'];
+
+  const rows = [cols.join(',')];
+  filteredData.forEach(d=>{
+    rows.push(cols.map(c=> csvEscape(d[c])).join(','));
+  });
+
+  const csvContent = '\uFEFF' + rows.join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const dateStr = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `KolaborAksi_W08_${dateStr}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('CSV berhasil diunduh ✓');
+});
+
+/* ================== DETAIL MODAL ================== */
+function detailRow(label, value){
+  return `<div>
+    <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); margin-bottom:3px;">${label}</div>
+    <div style="font-size:14px; color:var(--navy);">${value || '-'}</div>
+  </div>`;
+}
+
+function openDetail(i){
+  const d = filteredData[i];
+  if (!d) return;
+  currentDetailId = d['ID Submission'] || '';
+
+  let html = '';
+  html += detailRow('NPP Lengkap', d['NPP Lengkap']);
+  html += detailRow('Nama Pegawai', d['Nama Pegawai']);
+  html += detailRow('Cabang', d['Cabang']);
+  html += detailRow('No. Rekening Calon Agen', d['No. Rekening Calon Agen']);
+  html += detailRow('Nama Calon Agen', d['Nama Calon Agen']);
+  html += detailRow('No. HP/WA Calon Agen', d['No. HP/WA Calon Agen']);
+  html += detailRow('Alamat Email Wondr', d['Alamat Email Wondr']);
+  html += detailRow('Jenis Usaha Calon Agen', d['Jenis Usaha Calon Agen']);
+  html += detailRow('Alamat Usaha Calon Agen', d['Alamat Usaha Calon Agen']);
+
+  const fotoId = d['ID Foto'];
+  const fotoKtpId = d['ID Foto KTP'];
+  html += `<div style="display:flex; gap:10px; margin-top:6px;">
+    <button class="btn-internal" style="flex:1;" ${fotoId ? `onclick="openPhoto('Foto Akuisisi','${fotoId}')"` : 'disabled style="flex:1; opacity:.4;"'}>📷 Foto Akuisisi</button>
+    <button class="btn-internal" style="flex:1;" ${fotoKtpId ? `onclick="openPhoto('Foto KTP','${fotoKtpId}')"` : 'disabled style="flex:1; opacity:.4;"'}>🪪 Foto KTP</button>
+  </div>`;
+
+  const currentStatus = d['Status Follow Up'] || 'Menunggu Follow Up';
+  const currentNotes = d['Catatan Follow Up'] || '';
+  const statusOptions = ['Menunggu Follow Up','Proses','Closing','Tidak Closing'];
+
+  html += `<div style="border-top:1px solid var(--border); margin-top:6px; padding-top:16px;">
+    <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--teal); margin-bottom:10px;">Follow Up</div>
+    <select id="statusSelect" style="width:100%; background:#FAFBFC; border:1.5px solid var(--border); border-radius:11px; padding:11px 12px; font-family:'Inter',sans-serif; font-size:13px; margin-bottom:10px;">
+      ${statusOptions.map(s=> `<option value="${s}" ${s===currentStatus?'selected':''}>${s}</option>`).join('')}
+    </select>
+    <textarea id="notesInput" placeholder="Catatan follow up (opsional)" style="width:100%; min-height:70px; background:#FAFBFC; border:1.5px solid var(--border); border-radius:11px; padding:11px 12px; font-family:'Inter',sans-serif; font-size:13px; resize:vertical;">${currentNotes}</textarea>
+    <button class="submit-btn" style="margin-top:10px; padding:12px; font-size:14px;" id="saveFollowUpBtn" onclick="saveFollowUp()">Simpan Status</button>
+  </div>`;
+
+  $('detailBody').innerHTML = html;
+  $('detailOverlay').classList.add('show');
+}
+$('detailClose').addEventListener('click', ()=> $('detailOverlay').classList.remove('show'));
+
+let currentDetailId = '';
+
+async function saveFollowUp(){
+  const btn = $('saveFollowUpBtn');
+  const status = $('statusSelect').value;
+  const catatan = $('notesInput').value.trim();
+
+  if (!currentDetailId){
+    showToast('ID submission tidak ditemukan (data lama sebelum fitur ini ada).', true);
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Menyimpan...';
+  try{
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'updateStatus', id: currentDetailId, status, catatan })
+    });
+    const result = await res.json();
+    if (!result.success) throw new Error(result.error || 'Gagal menyimpan status.');
+
+    showToast('Status berhasil disimpan ✓');
+    $('detailOverlay').classList.remove('show');
+    loadDashboard();
+  }catch(err){
+    showToast(err.message, true);
+  }finally{
+    btn.disabled = false;
+    btn.textContent = 'Simpan Status';
+  }
+}
+
+/* ================== PHOTO PREVIEW MODAL ================== */
+function openPhoto(title, fileId){
+  $('photoTitle').textContent = title;
+  $('photoImg').src = 'https://drive.google.com/thumbnail?id=' + fileId + '&sz=w1000';
+  $('photoDownload').href = 'https://drive.google.com/uc?export=download&id=' + fileId;
+  $('photoOverlay').classList.add('show');
+}
+$('photoClose').addEventListener('click', ()=> $('photoOverlay').classList.remove('show'));
 
 $('filterCabang').addEventListener('change', ()=> renderTable(dashboardData));
 $('filterPegawai').addEventListener('input', ()=> renderTable(dashboardData));
