@@ -509,13 +509,19 @@
     display:flex;
     align-items:center;
     gap:12px;
+    flex-wrap:wrap;
   }
   .progress-row .p-name{
-    width:130px;
-    flex-shrink:0;
+    width:auto;
+    flex:1 1 140px;
+    min-width:110px;
     font-size:13px;
     font-weight:600;
     color:var(--navy);
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:4px;
   }
   .progress-track{
     flex:1;
@@ -980,13 +986,20 @@ function renderProgress(data){
     if (c) perCabang[c] = (perCabang[c]||0) + 1;
   });
 
-  $('cabangProgress').innerHTML = CABANG_LIST.map(c=>{
-    const count = perCabang[c] || 0;
-    const target = 5;
+  const target = 5;
+  const cabangRanked = CABANG_LIST
+    .map(c => ({ name: c, count: perCabang[c] || 0 }))
+    .sort((a, b) => b.count - a.count);
+
+  const juaraLabels = ['🥇 Juara I', '🥈 Juara II', '🥉 Juara III'];
+
+  $('cabangProgress').innerHTML = cabangRanked.map((item, i)=>{
+    const count = item.count;
     const pct = Math.min((count/target)*100, 100);
     const met = count >= target;
+    const juara = (met && i < 3) ? `<span class="lb-badge" style="margin-left:6px; background:#FFF6E0; color:#A9740B;">${juaraLabels[i]}</span>` : '';
     return `<div class="progress-row">
-      <div class="p-name">${c}</div>
+      <div class="p-name">${item.name}${juara}</div>
       <div class="progress-track"><div class="progress-fill ${met?'met':''}" style="width:${pct}%;"></div></div>
       <div class="progress-count ${met?'met':''}">${count}/${target}</div>
     </div>`;
@@ -1005,11 +1018,18 @@ function renderProgress(data){
     $('pegawaiLeaderboard').innerHTML = ranked.map(([name, count], i)=>{
       const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
       const met = count >= 2;
+      const isJuara = i === 0 && met;
+      let badge = '';
+      if (isJuara){
+        badge = '<span class="lb-badge" style="background:#FFF6E0; color:#A9740B;">🏆 Juara Individu</span>';
+      } else if (met){
+        badge = '<span class="lb-badge">✓ Threshold</span>';
+      }
       return `<div class="lb-row">
         <div class="lb-rank ${rankClass}">${i+1}</div>
         <div class="lb-name">${name}</div>
         <div class="lb-count">${count} closing</div>
-        ${met ? '<span class="lb-badge">✓ Threshold</span>' : ''}
+        ${badge}
       </div>`;
     }).join('');
   }
